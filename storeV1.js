@@ -5,7 +5,7 @@ let carrito = [];
 const divisa = '$';
 const DOMarticulos = document.querySelector('#articulos');
 const DOMcarrito = document.querySelector('#carrito');
-const DOMtotal = document.querySelector('#total');
+const DOMtotales = document.querySelector('#totales');
 const DOMordenar = document.querySelector('#ordenar');
 const DOMbotonVaciar = document.querySelector('#boton-vaciar');
 const miLocalStorage = window.localStorage;
@@ -232,6 +232,85 @@ function agregaTextoABase(base, textoAlInicio, textoAlFinal) {
     return base;
 }
 
+
+function renderizarTotales() {
+    // Vaciamos todo el html
+    // Div donde se colocara el Carrito
+    DOMcarrito.textContent = '';
+
+    /// Set es una estructura de datos, una colección de valores que permite sólo almacenar valores únicos de cualquier tipo,
+    const carritoSinDuplicados = [...new Set(carrito)];
+
+    // Contador 
+    let counter = carritoSinDuplicados.length;
+    // Sumadores
+    let piezas = 0.0;
+    let importe = 0.0;
+
+    // Generamos los Nodos a partir de carrito  /Aqui el BUCLE
+    carritoSinDuplicados.forEach((item) => {  // Guarda solo los ID
+        //Quito la unidad al contador
+        counter -= 1;
+        console.log("SOy de Totales Iteracion " + counter + " Y vamos en " + item);
+
+        // Cuenta el número de veces que se repite el producto
+        const numeroUnidadesItem = carrito.reduce((total, itemId) => {
+            // ¿Coincide las id? Incremento el contador, en caso contrario lo mantengo
+            return itemId === item ? total += 1 : total;
+        }, 0);
+
+        // Creamos el nodo del item del carrito
+        const miNodo = document.createElement('div');
+        const miCantidad = document.createElement('div');
+        const miTexto = document.createElement('div');
+        const miPrecioTotalPorArticulo = document.createElement('div');
+
+        //Borra el contenido de carrito/
+        carritoEnTexto = "";
+
+     
+
+        // Agrega el Texto al carrito
+        let docRef = db.collection("articulos").doc(item);
+        docRef.get().then((doc) => {
+            if (doc.exists) {
+
+                console.log("Esto sale si exito " +doc.data().precio + " Y vamos en " + item);
+
+
+                // Aqui voy a ir su mando y el sumador afuera.
+                // Dos sumaodres uno para cantidades y otro para Totales
+                piezas = piezas + numeroUnidadesItem;
+                // Importe 
+                importe = importe + doc.data().precio;
+
+                // Agrega texto a los elemtos que se muestran en el carrito.
+                miCantidad.textContent = `MI Toyal ${doc.data().precio} `;
+                miTexto.textContent = ` Otro texto ${doc.data().precio} `;
+                miPrecioTotalPorArticulo.textContent = `${doc.data().precio} Y uno mas`;
+
+                miNodo.appendChild(miCantidad);
+                miNodo.appendChild(miTexto);
+                miNodo.appendChild(miPrecioTotalPorArticulo);
+
+                DOMtotales.appendChild(miNodo)
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
+        });
+
+    });
+
+    // Renderizamos el precio total en el HTML
+    // DOMtotal.textContent = calcularTotalFirebase();
+
+}
+
+
 function renderizarCarrito() {
     // Vaciamos todo el html
     // Div donde se colocara el Carrito
@@ -279,6 +358,8 @@ function renderizarCarrito() {
                 let espacio = "%20"
                 let textoFormateado = espacio + "(" + espacio + numeroUnidadesItem + espacio + "x" + espacio + doc.data().articulo + espacio + ")" + espacio;
                 carritoEnTexto = agregaTextoABase(carritoEnTexto, "", textoFormateado);
+
+
 
                 // Agrega texto a los elemtos que se muestran en el carrito.
                 miCantidad.textContent = ` ${numeroUnidadesItem} x `;
@@ -375,6 +456,8 @@ DOMcarrito.addEventListener('change', (event) => {
 cargarCarritoDeLocalStorage();
 renderizarArticulosFirebase();
 renderizarCarrito();
+// Ahora voy a mostra los totales;
+renderizarTotales()
 //-> Aqui se cre el boton
 renderizarRealizarCompra();
 // -> Calcula si esta el boton
