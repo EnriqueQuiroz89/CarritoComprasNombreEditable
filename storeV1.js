@@ -35,7 +35,7 @@ function consultaNombreNegocio() {
 
 }
 
-function renderizarRealizarCompra() {
+function renderizarBotonPedirPorWhats() {
     //  const miBotonOrdenar = document.createElement('button');
     //  miBotonOrdenar.classList.add('btn');
     //  miBotonOrdenar.id = "btn-whats";
@@ -45,6 +45,18 @@ function renderizarRealizarCompra() {
 
     // No hay q agregar    //DOMordenar.appendChild(miBotonOrdenar);
 }
+
+function renderizarBotonVaciarCarrito() {
+    //  const miBotonOrdenar = document.createElement('button');
+    //  miBotonOrdenar.classList.add('btn');
+    //  miBotonOrdenar.id = "btn-whats";
+    const botonVaciar = document.getElementById("boton-vaciar");
+    botonVaciar.textContent = 'Vaciar Carrito';
+    botonVaciar.addEventListener('click', vaciarCarrito);
+
+    // No hay q agregar    //DOMordenar.appendChild(miBotonOrdenar);
+}
+
 
 
 //Renderizar Articulos
@@ -122,6 +134,7 @@ function anyadirProductoAlCarrito(evento) {
     console.log("Carrito contiene solo IDs" + carrito);
     /**Adicional Borrrar*/
     renderizarCarrito();
+    renderizarTotales();
     // Actualizamos el LocalStorage
     guardarCarritoEnLocalStorage();
     // Activa o desactiva
@@ -138,6 +151,7 @@ function borrarItemCarrito(evento) {
     });
     // volvemos a renderizar
     renderizarCarrito();
+    renderizarTotales();
     // Actualizamos el LocalStorage
     guardarCarritoEnLocalStorage();
     // Activa o desactiva
@@ -236,7 +250,7 @@ function agregaTextoABase(base, textoAlInicio, textoAlFinal) {
 function renderizarTotales() {
     // Vaciamos todo el html
     // Div donde se colocara el Carrito
-    DOMcarrito.textContent = '';
+    DOMtotales.textContent = '';
 
     /// Set es una estructura de datos, una colección de valores que permite sólo almacenar valores únicos de cualquier tipo,
     const carritoSinDuplicados = [...new Set(carrito)];
@@ -261,22 +275,20 @@ function renderizarTotales() {
 
         // Creamos el nodo del item del carrito
         const miNodo = document.createElement('div');
-        const miCantidad = document.createElement('div');
-        const miTexto = document.createElement('div');
-        const miPrecioTotalPorArticulo = document.createElement('div');
+        const piezaTotales = document.createElement('div');
+        const importeTotal = document.createElement('div');       
 
         //Borra el contenido de carrito/
         carritoEnTexto = "";
 
-     
-
         // Agrega el Texto al carrito
         let docRef = db.collection("articulos").doc(item);
         docRef.get().then((doc) => {
+
+            // Borra todo y solo deja los totales jejeje Gane
+            DOMtotales.textContent = '';
+
             if (doc.exists) {
-
-                console.log("Esto sale si exito " +doc.data().precio + " Y vamos en " + item);
-
 
                 // Aqui voy a ir su mando y el sumador afuera.
                 // Dos sumaodres uno para cantidades y otro para Totales
@@ -285,13 +297,11 @@ function renderizarTotales() {
                 importe = importe + doc.data().precio;
 
                 // Agrega texto a los elemtos que se muestran en el carrito.
-                miCantidad.textContent = `MI Toyal ${doc.data().precio} `;
-                miTexto.textContent = ` Otro texto ${doc.data().precio} `;
-                miPrecioTotalPorArticulo.textContent = `${doc.data().precio} Y uno mas`;
-
-                miNodo.appendChild(miCantidad);
-                miNodo.appendChild(miTexto);
-                miNodo.appendChild(miPrecioTotalPorArticulo);
+                piezaTotales.textContent = `Total de Piezas: ${piezas} `;
+                importeTotal.textContent = ` Importe total: ${importe}  `;
+              
+                miNodo.appendChild(piezaTotales);
+                miNodo.appendChild(importeTotal);
 
                 DOMtotales.appendChild(miNodo)
             } else {
@@ -316,7 +326,9 @@ function renderizarCarrito() {
     // Div donde se colocara el Carrito
     DOMcarrito.textContent = '';
 
-    /// Set es una estructura de datos, una colección de valores que permite sólo almacenar valores únicos de cualquier tipo,
+    // Set es una estructura de datos,
+    // una colección de valores que permite sólo 
+    // almacenar valores únicos de cualquier tipo,
     const carritoSinDuplicados = [...new Set(carrito)];
 
     // Contador 
@@ -326,7 +338,6 @@ function renderizarCarrito() {
     carritoSinDuplicados.forEach((item) => {  // Guarda solo los ID
         //Quito la unidad al contador
         counter -= 1;
-        console.log("Iteracion " + counter + " Y vamos en " + item);
 
         // Cuenta el número de veces que se repite el producto
         const numeroUnidadesItem = carrito.reduce((total, itemId) => {
@@ -358,8 +369,6 @@ function renderizarCarrito() {
                 let espacio = "%20"
                 let textoFormateado = espacio + "(" + espacio + numeroUnidadesItem + espacio + "x" + espacio + doc.data().articulo + espacio + ")" + espacio;
                 carritoEnTexto = agregaTextoABase(carritoEnTexto, "", textoFormateado);
-
-
 
                 // Agrega texto a los elemtos que se muestran en el carrito.
                 miCantidad.textContent = ` ${numeroUnidadesItem} x `;
@@ -402,7 +411,20 @@ function cargarCarritoDeLocalStorage() {
     if (miLocalStorage.getItem('carrito') !== null) {
         // Carga la información
         carrito = JSON.parse(miLocalStorage.getItem('carrito'));
+        console.log("fun cargarCarritoDesdeLocalStorage  "+carrito)
     }
+}
+
+function vaciarCarrito() {
+    carrito = []
+    carrito.length = 0
+
+    // AL vaciar el carrito Guarda el vacio en el Storage
+    guardarCarritoEnLocalStorage();
+    renderizarCarrito();
+    renderizarTotales();
+
+    console.log(carrito)
 }
 
 
@@ -458,8 +480,12 @@ renderizarArticulosFirebase();
 renderizarCarrito();
 // Ahora voy a mostra los totales;
 renderizarTotales()
+//-> Aqui se cre el boton Pedir por Whats
+renderizarBotonPedirPorWhats()
+// Aqui el boton para Vaciar carrito
 //-> Aqui se cre el boton
-renderizarRealizarCompra();
+renderizarBotonVaciarCarrito();
+
 // -> Calcula si esta el boton
 //onOffBotonPedirWhatsApp();
 

@@ -76,8 +76,18 @@
     max-width: 400px;
     width: 95%;
     min-height: 100px;
-    margin: 0 auto;
+    margin: 10px auto;
     background: silver;
+    padding: 10px;
+    
+}
+
+.area-libre {
+    max-width: 400px;
+    width: 95%;
+    min-height: 100px;
+    margin: 10px auto;
+    background: burlywood;
     padding: 10px;
 }
 

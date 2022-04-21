@@ -43,8 +43,8 @@ const form = document.getElementById('form'),
 const urlImagenDefault = 'https://res.cloudinary.com/muchosregistros/image/upload/w_100,c_scale/v1645734002/vcgsorn2397ptsd71pjg.png';
 
 /// Configuracion del fondo de la pagina
-const color =document.querySelector("#inputColor");
-color.addEventListener("change", (e)=> {
+const color = document.querySelector("#inputColor");
+color.addEventListener("change", (e) => {
     document.body.style.backgroundColor = e.target.value;
 })
 
@@ -434,7 +434,7 @@ function guardar() {
     db.collection("articulos").add({
         articulo: articulo,
         descripcion: descripcion,
-        precio: precio,
+        precio: Number(precio),
         imagen: imagen,
         fechaHoraCreacion: timeStamp,
         fechaHoraModificacion: timeStamp,
@@ -461,13 +461,14 @@ var table = document.getElementById('table');
  * Remplaza get()  por onSnapshot()
  * Se Elimina .get().then((querySnapshot)...) y queda .onSnapshot((querySnapshot)...) 
  */
+function renderizaArticulos() {
 
-let comprasRef = db.collection("articulos");
-comprasRef.orderBy("fechaHoraModificacion", "desc").onSnapshot((querySnapshot) => {
-    table.innerHTML = "";
-    querySnapshot.forEach((doc) => {
-        console.log(`${doc.id} => ${doc.data().fechaHora}`);
-        table.innerHTML += `
+    let comprasRef = db.collection("articulos");
+    comprasRef.orderBy("fechaHoraModificacion", "desc").onSnapshot((querySnapshot) => {
+        table.innerHTML = "";
+        querySnapshot.forEach((doc) => {
+            console.log(`${doc.id} => ${doc.data().fechaHora}`);
+            table.innerHTML += `
         <tr>
         <td>${doc.data().articulo}</td>
         <td>${doc.data().descripcion}</td>
@@ -482,8 +483,10 @@ comprasRef.orderBy("fechaHoraModificacion", "desc").onSnapshot((querySnapshot) =
         <tr></tr>                
         `
 
+        });
     });
-});
+}
+
 
 // BORRAR documentos
 function eliminar(id) {
@@ -494,16 +497,22 @@ function eliminar(id) {
     });
 }
 
-// EDITAR documento
-function editar(id, articulo, cantidad, nota, imagen) {
+// editar('${doc.id}',
+//        '${doc.data().articulo}',
+//        '${doc.data().descripcion}',
+//        '${doc.data().precio}',
+//        '${doc.data().imagen}')"
+
+
+function editar(id, articulo, descripcion, precio, imagen) {
     /**Activa el Boton de GUARDAR / CANCELAR*/
     setSubmitEnable(miBoton);
     //Limpia la galeria de la imagen por default
     limpiaGaleria();
     // Escribe en los campos los valores del renglon seleccionado
     document.getElementById('articulo').value = articulo;
-    document.getElementById('descripcion').value = cantidad;
-    document.getElementById('precio').value = nota;
+    document.getElementById('descripcion').value = descripcion;
+    document.getElementById('precio').value = precio;
     document.getElementById('imagen').value = imagen;
     // Muestra la imagen en Galery para que pueda ser editada.
     var img = new Image(); // HTML5 Constructor
@@ -527,6 +536,8 @@ function editar(id, articulo, cantidad, nota, imagen) {
     // Crea una funcion anonima para ejecutar cuando se haga click
     btnGuardarEdicion.onclick = function () {
         // El ID no va a cambiar
+
+       
         let compraRef = db.collection("articulos").doc(id);
         // Capturar los cambios realizados en los campos
         let articuloEditado = document.getElementById('articulo').value,
@@ -540,7 +551,7 @@ function editar(id, articulo, cantidad, nota, imagen) {
         return compraRef.update({
             articulo: articuloEditado,
             descripcion: descripcionEditada,
-            precio: precioEditado,
+            precio: Number(precioEditado),
             imagen: imagenEditada,
             fechaHoraModificacion: timeStamp,
         })
@@ -607,3 +618,5 @@ function resetValidaciones() {
     setInicialFor(miPrecio, 'Nombre del articulo no puede quedar vacio');
 }
 
+/// Siempre al iniciar
+renderizaArticulos();
