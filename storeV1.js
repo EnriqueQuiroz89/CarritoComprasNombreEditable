@@ -12,6 +12,10 @@ const miLocalStorage = window.localStorage;
 var carritoEnTexto = "";
 var nombreNegocio = "";
 
+var importeTotalGlobal = 0.0;       
+
+
+
 
 function consultaNombreNegocio() {
     // Consulta de FireBAse los datos del negocio
@@ -265,7 +269,7 @@ function renderizarTotales() {
     carritoSinDuplicados.forEach((item) => {  // Guarda solo los ID
         //Quito la unidad al contador
         counter -= 1;
-        console.log("SOy de Totales Iteracion " + counter + " Y vamos en " + item);
+       // console.log("SOy de Totales Iteracion " + counter + " Y vamos en " + item);
 
         // Cuenta el número de veces que se repite el producto
         const numeroUnidadesItem = carrito.reduce((total, itemId) => {
@@ -294,7 +298,9 @@ function renderizarTotales() {
                 // Dos sumaodres uno para cantidades y otro para Totales
                 piezas = piezas + numeroUnidadesItem;
                 // Importe 
-                importe = importe + doc.data().precio;
+                importe = importe + (doc.data().precio * numeroUnidadesItem);
+ 
+                importeTotalGlobal = importe;
 
                 // Agrega texto a los elemtos que se muestran en el carrito.
                 piezaTotales.textContent = `Total de Piezas: ${piezas} `;
@@ -373,7 +379,7 @@ function renderizarCarrito() {
                 // Agrega texto a los elemtos que se muestran en el carrito.
                 miCantidad.textContent = ` ${numeroUnidadesItem} x `;
                 miTexto.textContent = ` ${doc.data().articulo} - `;
-                miPrecioTotalPorArticulo.textContent = ` ${divisa} ${doc.data().precio}`;
+                miPrecioTotalPorArticulo.textContent = ` ${divisa} ${doc.data().precio * numeroUnidadesItem} `;
                 // Boton de borrar
                 const miBoton = document.createElement('button');
                 miBoton.classList.add('btn', 'btn-danger', 'mx-5');
