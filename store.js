@@ -6,7 +6,7 @@ if ("loading" in HTMLImageElement.prototype) {
         img.src = img.dataset.src;
     });
     // Muestra mensaje
-    console.log("El navegador soporta `lazy-loading`...");
+    // console.log("El navegador soporta `lazy-loading`...");
 } else {
     // Importamos dinámicamente la libreria `lazysizes`
     let script = document.createElement("script");
@@ -121,7 +121,6 @@ function enviaMensajeWhatsApp(articulo, descripcion, precio, imagen) {
 let negocioRef = db.collection("negocios");
 negocioRef.limit(1).onSnapshot((querySnapshot) => {
     querySnapshot.forEach((doc) => {
-        console.log(`${doc.id} => ${doc.data().fechaHora}`);
         /**La imagen se guarda con el url de un Tumbnail
          * Por eso hay que convertir la URl        */
         let urlBase = doc.data().imagen;
@@ -131,7 +130,8 @@ negocioRef.limit(1).onSnapshot((querySnapshot) => {
         tokens.splice(-3, 1); /**Elimina desde el final -3, elimina 1 y no inserta nada*/
         /**Une el contenido del array en uno nuevo*/
         let urlModificada = tokens.join('/');
-        console.log('URL modif ->' + urlModificada); /**URL extraida de la respuesta */
+      
+        //  console.log('URL modif ->' + urlModificada); /**URL extraida de la respuesta */
 
         imagenNegocio.innerHTML += `<img src="${urlModificada}" alt="#" id="logo-negocio" class="logo-negocio">`;
 

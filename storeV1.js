@@ -12,10 +12,8 @@ const miLocalStorage = window.localStorage;
 var carritoEnTexto = "";
 var nombreNegocio = "";
 
-var importeTotalGlobal = 0.0;       
-
-
-
+var importeTotalGlobal = 0.0;
+var piezasTotalesGlobal = 0.0;
 
 function consultaNombreNegocio() {
     // Consulta de FireBAse los datos del negocio
@@ -28,7 +26,7 @@ function consultaNombreNegocio() {
         if (doc.exists) {
             // Extrae el nombre del negocio
             nombreNegocio = doc.data().negocio;
-            console.log("El negocio es: " + nombreNegocio);
+            //      console.log("El negocio es: " + nombreNegocio);
         } else {
             // doc.data() will be undefined in this case
             console.log("No such document!");
@@ -65,8 +63,6 @@ function renderizarBotonVaciarCarrito() {
 
 //Renderizar Articulos
 function renderizarArticulosFirebase() {
-
-    console.log("Si llego desde la funcion Chida");
 
     let articulosRef = db.collection("articulos");
 
@@ -133,9 +129,9 @@ function anyadirProductoAlCarrito(evento) {
     // AQUI CAPTURO EL iD QUE YO DECIDI GURADR EN EL BOTON
     carrito.push(evento.target.getAttribute('marcador'))
     //Aqui lo muestro
-    console.log(evento.target)
+    /// SI PONER /// console.log(evento.target)
     // Muesra contenido
-    console.log("Carrito contiene solo IDs" + carrito);
+    //   console.log("Carrito contiene solo IDs" + carrito);
     /**Adicional Borrrar*/
     renderizarCarrito();
     renderizarTotales();
@@ -187,22 +183,13 @@ function enviarPedidoPorWhatsApp() {
     window.open(textoParaWhatsApp);
 }
 
-
 function totalesCarrito() {
-
-    let totalPiezas = 4
-    let importeTotal = 567
-
     let objTotales = {
-        piezas: totalPiezas,
-        importe: importeTotal
+        piezas: piezasTotalesGlobal,
+        importe: importeTotalGlobal
     }
-
     return objTotales;
 }
-
-
-
 
 // Definir la función asíncrona preCalentarHorno
 const preCalentarHorno = async () => {
@@ -261,6 +248,8 @@ function renderizarTotales() {
 
     // Contador 
     let counter = carritoSinDuplicados.length;
+
+    console.log("El tamaño de Items en el array es de " + counter);
     // Sumadores
     let piezas = 0.0;
     let importe = 0.0;
@@ -269,7 +258,6 @@ function renderizarTotales() {
     carritoSinDuplicados.forEach((item) => {  // Guarda solo los ID
         //Quito la unidad al contador
         counter -= 1;
-       // console.log("SOy de Totales Iteracion " + counter + " Y vamos en " + item);
 
         // Cuenta el número de veces que se repite el producto
         const numeroUnidadesItem = carrito.reduce((total, itemId) => {
@@ -279,8 +267,8 @@ function renderizarTotales() {
 
         // Creamos el nodo del item del carrito
         const miNodo = document.createElement('div');
-        const piezaTotales = document.createElement('div');
-        const importeTotal = document.createElement('div');       
+        const DOMpiezaTotales = document.createElement('div');
+        const DOMimporteTotal = document.createElement('div');
 
         //Borra el contenido de carrito/
         carritoEnTexto = "";
@@ -293,23 +281,21 @@ function renderizarTotales() {
             DOMtotales.textContent = '';
 
             if (doc.exists) {
-
-                // Aqui voy a ir su mando y el sumador afuera.
-                // Dos sumaodres uno para cantidades y otro para Totales
-                piezas = piezas + numeroUnidadesItem;
-                // Importe 
                 importe = importe + (doc.data().precio * numeroUnidadesItem);
- 
+                piezas = piezas + numeroUnidadesItem;
+
                 importeTotalGlobal = importe;
+                piezasTotalesGlobal = piezas;
 
                 // Agrega texto a los elemtos que se muestran en el carrito.
-                piezaTotales.textContent = `Total de Piezas: ${piezas} `;
-                importeTotal.textContent = ` Importe total: ${importe}  `;
-              
-                miNodo.appendChild(piezaTotales);
-                miNodo.appendChild(importeTotal);
+                DOMpiezaTotales.textContent = `Total de Piezas: ${piezas} `;
+                DOMimporteTotal.textContent = ` Importe total: ${importe}  `;
 
-                DOMtotales.appendChild(miNodo)
+                miNodo.appendChild(DOMpiezaTotales);
+                miNodo.appendChild(DOMimporteTotal);
+                // Si contador es 0 coloca en el area el resultado.
+                counter ? 0 : DOMtotales.appendChild(miNodo)
+
             } else {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
@@ -320,12 +306,9 @@ function renderizarTotales() {
         });
 
     });
-
     // Renderizamos el precio total en el HTML
     // DOMtotal.textContent = calcularTotalFirebase();
-
 }
-
 
 function renderizarCarrito() {
     // Vaciamos todo el html
@@ -361,6 +344,9 @@ function renderizarCarrito() {
         const miTexto = document.createElement('div');
         miTexto.classList.add('texto-articulo-carrito')
 
+        const precioUnitarioArticulo = document.createElement('div');
+        precioUnitarioArticulo.classList.add('precio-unitario-articulo')
+
         const miPrecioTotalPorArticulo = document.createElement('div');
         miPrecioTotalPorArticulo.classList.add('precio-total-articulo-carrito')
 
@@ -377,9 +363,10 @@ function renderizarCarrito() {
                 carritoEnTexto = agregaTextoABase(carritoEnTexto, "", textoFormateado);
 
                 // Agrega texto a los elemtos que se muestran en el carrito.
-                miCantidad.textContent = ` ${numeroUnidadesItem} x `;
-                miTexto.textContent = ` ${doc.data().articulo} - `;
-                miPrecioTotalPorArticulo.textContent = ` ${divisa} ${doc.data().precio * numeroUnidadesItem} `;
+                miCantidad.textContent = ` x ${numeroUnidadesItem}  `;
+                miTexto.textContent = ` ${doc.data().articulo} `;
+                precioUnitarioArticulo.textContent = `${divisa} ${doc.data().precio}`;
+                miPrecioTotalPorArticulo.textContent = `=${divisa} ${doc.data().precio * numeroUnidadesItem} `;
                 // Boton de borrar
                 const miBoton = document.createElement('button');
                 miBoton.classList.add('btn', 'btn-danger', 'mx-5');
@@ -388,8 +375,9 @@ function renderizarCarrito() {
                 miBoton.dataset.item = item;
                 miBoton.addEventListener('click', borrarItemCarrito);
                 // Mezclamos nodos
-                miNodo.appendChild(miCantidad);
                 miNodo.appendChild(miTexto);
+                miNodo.appendChild(precioUnitarioArticulo);
+                miNodo.appendChild(miCantidad);
                 miNodo.appendChild(miPrecioTotalPorArticulo);
                 miNodo.appendChild(miBoton);
                 DOMcarrito.appendChild(miNodo);
@@ -417,13 +405,13 @@ function cargarCarritoDeLocalStorage() {
     if (miLocalStorage.getItem('carrito') !== null) {
         // Carga la información
         carrito = JSON.parse(miLocalStorage.getItem('carrito'));
-        console.log("fun cargarCarritoDesdeLocalStorage  "+carrito)
     }
 }
 
 function vaciarCarrito() {
     carrito = []
     carrito.length = 0
+    carritoEnTexto = ""
 
     // AL vaciar el carrito Guarda el vacio en el Storage
     guardarCarritoEnLocalStorage();

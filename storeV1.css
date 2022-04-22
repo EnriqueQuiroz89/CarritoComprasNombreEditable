@@ -122,6 +122,11 @@
     text-align: center;
 }
 
+.precio-unitario-articulo {
+    background: palegreen;
+    width: 20%;
+    text-align: center;
+}
 .precio-total-articulo-carrito {
     background: paleturquoise;
     width: 20%;
