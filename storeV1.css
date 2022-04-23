@@ -79,25 +79,35 @@
     margin: 10px auto;
     background: silver;
     padding: 10px;
-    
+
 }
 
-.area-libre {
+.area-controles-carrito {
+    max-width: 400px;
+    width: 95%;
+    min-height: 100px;
+    margin: 10px auto;
+    background: burlywood;
+    padding: 10px;  
+}
+
+.area-carrito {
     max-width: 400px;
     width: 95%;
     min-height: 100px;
     margin: 10px auto;
     background: burlywood;
     padding: 10px;
+    display: none;
 }
 
 .totales {
     max-width: 400px;
     width: 95%;
-    min-height: 100px;
-    margin: 0 auto;
+    margin: 5px auto;
     background: silver;
     padding: 10px;
+    text-align: center;
 }
 
 .articulo-carrito {
@@ -122,11 +132,6 @@
     text-align: center;
 }
 
-.precio-unitario-articulo {
-    background: palegreen;
-    width: 20%;
-    text-align: center;
-}
 .precio-total-articulo-carrito {
     background: paleturquoise;
     width: 20%;
@@ -134,14 +139,11 @@
 }
 
 /**Ordenar compra*/
-.ordenar{
-max-width: 400px;
-width: 95%;
-min-height: 100px;
-margin: 0 auto;
-background: paleturquoise;
-padding: 10px;
+.ordenar {
+    max-width: 400px;
+    width: 95%;
+    min-height: 100px;
+    margin: 0 auto;
+    background: paleturquoise;
+    padding: 10px;
 }
-
-
-

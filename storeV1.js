@@ -8,12 +8,40 @@ const DOMcarrito = document.querySelector('#carrito');
 const DOMtotales = document.querySelector('#totales');
 const DOMordenar = document.querySelector('#ordenar');
 const DOMbotonVaciar = document.querySelector('#boton-vaciar');
+const DOMcontrolArea = document.querySelector('#control-area-carrito');
+const DOMareaCarrito = document.querySelector('#area-carrito');
+
 const miLocalStorage = window.localStorage;
 var carritoEnTexto = "";
 var nombreNegocio = "";
-
 var importeTotalGlobal = 0.0;
-var piezasTotalesGlobal = 0.0;
+
+function renderizarBotonesAreaCarrito() {
+    const botonMostrarArea = document.createElement('button');
+    botonMostrarArea.classList.add('btn', 'btn-primary');
+    botonMostrarArea.textContent = 'Mostrar';
+    botonMostrarArea.style.marginLeft = '1rem';
+    botonMostrarArea.style.display = 'inline';
+    botonMostrarArea.addEventListener('click', mostrarArea);
+
+    const botonOcultarArea = document.createElement('button');
+    botonOcultarArea.classList.add('btn', 'btn-primary');
+    botonOcultarArea.textContent = 'Ocultar';
+    botonOcultarArea.style.marginLeft = '1rem';
+    botonOcultarArea.style.display = 'inline';
+    botonOcultarArea.addEventListener('click', ocultaArea);
+
+    DOMcontrolArea.appendChild(botonMostrarArea);
+    DOMcontrolArea.appendChild(botonOcultarArea);
+}
+
+function ocultaArea() {
+    DOMareaCarrito.style.display = 'none';
+}
+
+function mostrarArea() {
+    DOMareaCarrito.style.display = 'block';
+}
 
 function consultaNombreNegocio() {
     // Consulta de FireBAse los datos del negocio
@@ -26,7 +54,7 @@ function consultaNombreNegocio() {
         if (doc.exists) {
             // Extrae el nombre del negocio
             nombreNegocio = doc.data().negocio;
-            //      console.log("El negocio es: " + nombreNegocio);
+            console.log("El negocio es: " + nombreNegocio);
         } else {
             // doc.data() will be undefined in this case
             console.log("No such document!");
@@ -34,7 +62,6 @@ function consultaNombreNegocio() {
     }).catch((error) => {
         console.log("Error getting document:", error);
     });
-
 }
 
 function renderizarBotonPedirPorWhats() {
@@ -44,7 +71,6 @@ function renderizarBotonPedirPorWhats() {
     const miBotonOrdenar = document.getElementById("btn-whats");
     miBotonOrdenar.textContent = 'Pedir por Whats PArcial';
     miBotonOrdenar.addEventListener('click', enviarPedidoPorWhatsApp);
-
     // No hay q agregar    //DOMordenar.appendChild(miBotonOrdenar);
 }
 
@@ -55,17 +81,13 @@ function renderizarBotonVaciarCarrito() {
     const botonVaciar = document.getElementById("boton-vaciar");
     botonVaciar.textContent = 'Vaciar Carrito';
     botonVaciar.addEventListener('click', vaciarCarrito);
-
     // No hay q agregar    //DOMordenar.appendChild(miBotonOrdenar);
 }
 
-
-
 //Renderizar Articulos
 function renderizarArticulosFirebase() {
-
+    console.log("Si llego desde la funcion Chida");
     let articulosRef = db.collection("articulos");
-
     articulosRef.orderBy("fechaHoraModificacion", "desc").onSnapshot((querySnapshot) => {
         //table.innerHTML = "";
         // console.log(`${doc.id} => ${doc.data().fechaHora}`);
@@ -129,9 +151,9 @@ function anyadirProductoAlCarrito(evento) {
     // AQUI CAPTURO EL iD QUE YO DECIDI GURADR EN EL BOTON
     carrito.push(evento.target.getAttribute('marcador'))
     //Aqui lo muestro
-    /// SI PONER /// console.log(evento.target)
+    console.log(evento.target)
     // Muesra contenido
-    //   console.log("Carrito contiene solo IDs" + carrito);
+    console.log("Carrito contiene solo IDs" + carrito);
     /**Adicional Borrrar*/
     renderizarCarrito();
     renderizarTotales();
@@ -183,13 +205,22 @@ function enviarPedidoPorWhatsApp() {
     window.open(textoParaWhatsApp);
 }
 
+
 function totalesCarrito() {
+
+    let totalPiezas = 4
+    let importeTotal = 567
+
     let objTotales = {
-        piezas: piezasTotalesGlobal,
-        importe: importeTotalGlobal
+        piezas: totalPiezas,
+        importe: importeTotal
     }
+
     return objTotales;
 }
+
+
+
 
 // Definir la función asíncrona preCalentarHorno
 const preCalentarHorno = async () => {
@@ -248,8 +279,6 @@ function renderizarTotales() {
 
     // Contador 
     let counter = carritoSinDuplicados.length;
-
-    console.log("El tamaño de Items en el array es de " + counter);
     // Sumadores
     let piezas = 0.0;
     let importe = 0.0;
@@ -258,6 +287,7 @@ function renderizarTotales() {
     carritoSinDuplicados.forEach((item) => {  // Guarda solo los ID
         //Quito la unidad al contador
         counter -= 1;
+        // console.log("SOy de Totales Iteracion " + counter + " Y vamos en " + item);
 
         // Cuenta el número de veces que se repite el producto
         const numeroUnidadesItem = carrito.reduce((total, itemId) => {
@@ -267,8 +297,8 @@ function renderizarTotales() {
 
         // Creamos el nodo del item del carrito
         const miNodo = document.createElement('div');
-        const DOMpiezaTotales = document.createElement('div');
-        const DOMimporteTotal = document.createElement('div');
+        const piezaTotales = document.createElement('div');
+        const importeTotal = document.createElement('div');
 
         //Borra el contenido de carrito/
         carritoEnTexto = "";
@@ -281,21 +311,23 @@ function renderizarTotales() {
             DOMtotales.textContent = '';
 
             if (doc.exists) {
-                importe = importe + (doc.data().precio * numeroUnidadesItem);
+
+                // Aqui voy a ir su mando y el sumador afuera.
+                // Dos sumaodres uno para cantidades y otro para Totales
                 piezas = piezas + numeroUnidadesItem;
+                // Importe 
+                importe = importe + (doc.data().precio * numeroUnidadesItem);
 
                 importeTotalGlobal = importe;
-                piezasTotalesGlobal = piezas;
 
                 // Agrega texto a los elemtos que se muestran en el carrito.
-                DOMpiezaTotales.textContent = `Total de Piezas: ${piezas} `;
-                DOMimporteTotal.textContent = ` Importe total: ${importe}  `;
+                piezaTotales.textContent = `Total de Piezas: ${piezas} `;
+                importeTotal.textContent = ` Importe total: $ ${importe}  `;
 
-                miNodo.appendChild(DOMpiezaTotales);
-                miNodo.appendChild(DOMimporteTotal);
-                // Si contador es 0 coloca en el area el resultado.
-                counter ? 0 : DOMtotales.appendChild(miNodo)
+                miNodo.appendChild(piezaTotales);
+                miNodo.appendChild(importeTotal);
 
+                DOMtotales.appendChild(miNodo)
             } else {
                 // doc.data() will be undefined in this case
                 console.log("No such document!");
@@ -306,9 +338,12 @@ function renderizarTotales() {
         });
 
     });
+
     // Renderizamos el precio total en el HTML
     // DOMtotal.textContent = calcularTotalFirebase();
+
 }
+
 
 function renderizarCarrito() {
     // Vaciamos todo el html
@@ -344,9 +379,6 @@ function renderizarCarrito() {
         const miTexto = document.createElement('div');
         miTexto.classList.add('texto-articulo-carrito')
 
-        const precioUnitarioArticulo = document.createElement('div');
-        precioUnitarioArticulo.classList.add('precio-unitario-articulo')
-
         const miPrecioTotalPorArticulo = document.createElement('div');
         miPrecioTotalPorArticulo.classList.add('precio-total-articulo-carrito')
 
@@ -363,10 +395,9 @@ function renderizarCarrito() {
                 carritoEnTexto = agregaTextoABase(carritoEnTexto, "", textoFormateado);
 
                 // Agrega texto a los elemtos que se muestran en el carrito.
-                miCantidad.textContent = ` x ${numeroUnidadesItem}  `;
-                miTexto.textContent = ` ${doc.data().articulo} `;
-                precioUnitarioArticulo.textContent = `${divisa} ${doc.data().precio}`;
-                miPrecioTotalPorArticulo.textContent = `=${divisa} ${doc.data().precio * numeroUnidadesItem} `;
+                miCantidad.textContent = ` ${numeroUnidadesItem} x `;
+                miTexto.textContent = ` ${doc.data().articulo} - `;
+                miPrecioTotalPorArticulo.textContent = ` ${divisa} ${doc.data().precio * numeroUnidadesItem} `;
                 // Boton de borrar
                 const miBoton = document.createElement('button');
                 miBoton.classList.add('btn', 'btn-danger', 'mx-5');
@@ -375,9 +406,8 @@ function renderizarCarrito() {
                 miBoton.dataset.item = item;
                 miBoton.addEventListener('click', borrarItemCarrito);
                 // Mezclamos nodos
-                miNodo.appendChild(miTexto);
-                miNodo.appendChild(precioUnitarioArticulo);
                 miNodo.appendChild(miCantidad);
+                miNodo.appendChild(miTexto);
                 miNodo.appendChild(miPrecioTotalPorArticulo);
                 miNodo.appendChild(miBoton);
                 DOMcarrito.appendChild(miNodo);
@@ -405,13 +435,13 @@ function cargarCarritoDeLocalStorage() {
     if (miLocalStorage.getItem('carrito') !== null) {
         // Carga la información
         carrito = JSON.parse(miLocalStorage.getItem('carrito'));
+        console.log("fun cargarCarritoDesdeLocalStorage  " + carrito)
     }
 }
 
 function vaciarCarrito() {
     carrito = []
     carrito.length = 0
-    carritoEnTexto = ""
 
     // AL vaciar el carrito Guarda el vacio en el Storage
     guardarCarritoEnLocalStorage();
@@ -434,6 +464,10 @@ function onOffBotonPedirWhatsApp() {
         console.log("Carrito NO vacio " + carrito.length)
         setSubmitEnable(botonWhats);
     }
+}
+
+function mostrar() {
+
 }
 
 // ACTIVA / DESACTIVA Boton enviar
@@ -479,6 +513,8 @@ renderizarBotonPedirPorWhats()
 // Aqui el boton para Vaciar carrito
 //-> Aqui se cre el boton
 renderizarBotonVaciarCarrito();
+
+renderizarBotonesAreaCarrito();
 
 // -> Calcula si esta el boton
 //onOffBotonPedirWhatsApp();
